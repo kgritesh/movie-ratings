@@ -1,0 +1,8 @@
+{
+  "name": "movie-ratings",
+  "version": "0.0.1",
+  "description": "A browser extension to show imdb/rotten tomatoes movie ratings on streaming sites",
+  "main": "index.js",
+  "author": "Ritesh Kadmawala<k.g.ritesh@gmail.com>",
+  "license": "MIT"
+}
