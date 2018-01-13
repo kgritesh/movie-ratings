@@ -3,6 +3,7 @@ const fs = require('fs');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const ChromeExtensionReloader  = require('webpack-chrome-extension-reloader');
 
 const node_dir = path.join(__dirname, 'node_modules');
 
@@ -23,6 +24,7 @@ module.exports = {
 
   plugins: [
     // clean the build folder
+    //new ChromeExtensionReloader(),
     new CleanWebpackPlugin(["dist"]),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || 'development')
@@ -41,7 +43,6 @@ module.exports = {
 
           ...JSON.parse(content.toString())
         });
-        console.log(newContent,process.env.npm_package_version);
         return newContent;
       }
     }, {
