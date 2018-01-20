@@ -29,14 +29,33 @@ module.exports = {
         if (results.length > 0) {
           return this._getById(results[0].imdbID)
             .then(res => {
-                if (res) {
-                  ratingStore.save(res);
-                }
+              if (res) {
+                ratingStore.save(res);
                 return res;
+              }
+              return this._saveEmptyRating(type, title);
             });
         }
-        return null;
+        return this._saveEmptyRating(type, title);
       })
+  },
+
+  _saveEmptyRating(type, title) {
+    const item = new RatingItem(type, title);
+    ratingStore.save(item);
+    return item;
+  },
+
+  _ratingSourceMapper(source) {
+    switch (source.toLowerCase().trim()) {
+      case 'internet movie database':
+        return 'imdb';
+      case 'rotten tomatoes':
+        return 'rottenTomatoes';
+      case 'metacritic':
+        return 'metacritic';
+    }
+    return 'imdb';
   },
 
   _getById(id) {
@@ -44,10 +63,18 @@ module.exports = {
     return this.omdbClient.getById(id)
       .then(omdbRating => {
         if (omdbRating) {
-          return new RatingItem(omdbRating);
-        } else {
-          return null;
+          const title =  omdbRating.Title;
+          const type = omdbRating.Type;
+          const imdbId = omdbRating.imdbID;
+          const ratings = omdbRating.Ratings.reduce(
+            (ratings, obj) => {
+              const source = this._ratingSourceMapper(obj.Source);
+              ratings[source] = obj.Value;
+              return ratings;
+          }, {});
+          return new RatingItem(type, title, imdbId, ratings);
         }
+        return null;
       });
   }
 }

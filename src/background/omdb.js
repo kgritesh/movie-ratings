@@ -58,7 +58,7 @@ class OmdbClient {
     return fetch(url).then(this._parseHttpResponse);
   }
 
-  search(title, type=null, year=null, page=1) {
+  search(title, type=null, year=null, page=1, exactMatch = true) {
     const params = {
       apiKey: this.apiKey,
       s: title.replace(' ', '+'),
@@ -79,10 +79,17 @@ class OmdbClient {
     return fetch(url)
       .then(this._parseHttpResponse)
       .then((data) => {
-        console.log("Search Result", data);
-        return data ? data['Search'] : [];
+        const results = data ? data['Search'] : [];
+        console.log('Seach Results', results);
+        if (exactMatch) {
+          return results.filter((res) => res.Title.toLowerCase() === title.toLowerCase());
+        }
+        return results;
       });
   }
+
+
+
 }
 
 module.exports = OmdbClient;

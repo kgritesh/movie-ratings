@@ -27,18 +27,19 @@ module.exports = {
       chrome.storage.local.get(key, (items) => {
         let err = chrome.runtime.lastError;
         if (err) {
+            console.error('Failed to find from chorme storage', err);
             reject(err);
-        } else {
-          if (items && items[key]) {
+        } else if (items && items[key]) {
             const createdAt = new Date(items[key].createdAt);
             if (utils.daysBetween(createdAt, new Date()) >= this.DEFAULT_EXPIRY) {
               console.log('Key expired', key, createdAt);
               this.remove(key);
-              resolve(null)
+              resolve(null);
             } else {
               resolve(items[key]);
             }
-          }
+        } else {
+          resolve(null);
         }
       });
     });

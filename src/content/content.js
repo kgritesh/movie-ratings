@@ -1,5 +1,5 @@
 
-const seenTitles = {};
+const ratings = {};
 const RE_TYPE = new RegExp("www.hotstar.com/([^/]+)", "g");
 
 function findType() {
@@ -23,11 +23,16 @@ function findTitles() {
     }
     const title = elem.innerText;
     const key = `${title}:${type}`;
-    if (!seenTitles[key]) {
+    if (!ratings[key]) {
       newTitles.push({
         type, title
       });
-      seenTitles[key] = true;
+      ratings[key] = {
+        found: false
+      };
+    } else if(ratings[key].found) {
+      console.log('Adding Ratings to already found title', ratings[key].rating)
+      addRatingToCard(ratings[key].rating);
     }
   });
   chrome.runtime.sendMessage({
@@ -37,14 +42,23 @@ function findTitles() {
 }
 
 function addRatingToCard(rating) {
-  console.log('Adding Rating to card for ', rating.title);
-  const elem = $(`h3:contains('${rating.title}')`)[0];
-  const card = $(elem).parents('.meta-description');
-
-  card.css('height', '75px');
-  const txt = `Imdb: ${rating.ratings.imdb}`;
-  const ratingDiv = `<span class="subdetails">Imdb: ${rating.ratings.imdb}</span>`;
-  card.append(ratingDiv);
+  const elems = $(`h3:contains('${rating.title}')`);
+  console.log('Adding Rating to card for ', rating.title, elems.length);
+  elems.each((index, elem) => {
+    const card = $(elem).parents('.meta-description');
+    if (card.find('span:contains("Imdb")').length > 0) {
+      return;
+    }
+    card.css('height', '75px');
+    const txt = `Imdb: ${rating.ratings.imdb ? rating.ratings.imdb : 'NA'}`;
+    const ratingDiv = `<span class="subdetails ratings">${txt}</span>`;
+    card.append(ratingDiv);
+    const key = `${rating.title}:${rating.type}`;
+    ratings[key] = {
+      rating,
+      found: true
+    }
+  });
 }
 
 findTitles();
