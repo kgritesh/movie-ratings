@@ -1,6 +1,24 @@
 
-const ratings = {};
-const RE_TYPE = new RegExp("www.hotstar.com/([^/]+)", "g");
+const titleMap = {};
+const RE_TYPE = new RegExp("www.hotstar.com/([^/]+)");
+
+function init() {
+  findTitles();
+  chrome.runtime.onMessage.addListener((req, sender, sendRespone) => {
+    switch(req.type) {
+      case 'loadMovies':
+        findTitles();
+        return;
+      case 'ratings':
+        addRatings(req.payload);
+        return;
+    }
+  });
+
+  setInterval(() => {
+    findTitles();
+  }, 30000);
+};
 
 function findType() {
   const res = RE_TYPE.exec(window.location.href);
@@ -11,69 +29,72 @@ function findType() {
 }
 
 function checkIfMovieOrSeries(elem) {
-  return $(elem).parents(".meta-description").find('.subdetails').length > 0;
+  return $(elem).find('.subdetails').length > 0;
 }
 
 function findTitles() {
   const type = findType();
+  const allCards = $('.meta-description');
   const newTitles = [];
-  $('h3.title').each((index, elem) => {
-    if (!checkIfMovieOrSeries(elem) || !type) {
-      return;
+  for (let i = 0; i < allCards.length; ++i) {
+    const elem = allCards[i];
+    const title = $(elem).find('h3.title').first().text().toLowerCase();
+    if (!title || !checkIfMovieOrSeries(elem)) {
+      continue;
     }
-    const title = elem.innerText;
     const key = `${title}:${type}`;
-    if (!ratings[key]) {
+    if (!titleMap[key]) {
       newTitles.push({
         type, title
       });
-      ratings[key] = {
-        found: false
+      titleMap[key] = {
+        rating: null,
+        type,
+        title,
+        cards: new Set([elem])
       };
-    } else if(ratings[key].found) {
-      console.log('Adding Ratings to already found title', ratings[key].rating)
-      addRatingToCard(ratings[key].rating);
+    } else {
+      const titleItem = titleMap[key];
+      if (!titleItem.cards.has(elem)) {
+        titleItem.cards.add(elem);
+        if (titleItem.rating) {
+          addRatingToCard(elem, titleItem.rating);
+        }
+      }
     }
-  });
+  }
   chrome.runtime.sendMessage({
     type: 'fetchRatings',
     payload: newTitles
   });
 }
 
-function addRatingToCard(rating) {
-  const elems = $(`h3:contains('${rating.title}')`);
-  console.log('Adding Rating to card for ', rating.title, elems.length);
-  elems.each((index, elem) => {
-    const card = $(elem).parents('.meta-description');
-    if (card.find('span:contains("Imdb")').length > 0) {
-      return;
-    }
-    card.css('height', '75px');
-    const txt = `Imdb: ${rating.ratings.imdb ? rating.ratings.imdb : 'NA'}`;
-    const ratingDiv = `<span class="subdetails ratings">${txt}</span>`;
-    card.append(ratingDiv);
-    const key = `${rating.title}:${rating.type}`;
-    ratings[key] = {
-      rating,
-      found: true
-    }
-  });
+function addRatings(rating) {
+  const key = `${rating.title}:${rating.type}`;
+  const titleItem = titleMap[key];
+  titleItem.rating = rating;
+  titleItem.cards.forEach(card => addRatingToCard(card, rating));
+}''
+
+function addRatingToCard(elem, rating) {
+  const card = $(elem);
+  card.css('height', '140px');
+  const imdbUrl = chrome.extension.getURL('img/imdb.png');
+  const rottenTomatoesUrl = chrome.extension.getURL('img/rottenTomatoes.png');
+  const metacriticUrl = chrome.extension.getURL('img/metacritic.png');
+  addRatingIcon(card, imdbUrl, rating.ratings.imdb || 'NA');
+  addRatingIcon(card, rottenTomatoesUrl, rating.ratings.rottenTomatoes || 'NA');
+  addRatingIcon(card, metacriticUrl, rating.ratings.rottenTomatoes || 'NA');
 }
 
-findTitles();
-chrome.runtime.onMessage.addListener((req, sender, sendRespone) => {
-  switch(req.type) {
-    case 'loadMovies':
-      findTitles();
-      return;
-    case 'ratings':
-      console.log('Got Ratings for', req.payload);
-      addRatingToCard(req.payload);
-      return;
-  }
-  if (req.type === 'loadMovies') {
-    findTitles();
-  }
+function addRatingIcon(container, url, value) {
+  const tag = `
+    <div>
+      <img src="${url}" style="width: 32px !important; padding: 5px">
+      <span class="subdetails ratings">${value}</span>
+    </div>
+  `;
+  container.append(tag);
+}
 
-});
+init();

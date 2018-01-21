@@ -2,7 +2,7 @@
 class RatingItem {
 
   constructor(type, title, imdbId = null, ratings = {}) {
-    this.title = title;
+    this.title = title.toLowerCase();
     this.type = type;
     this.ratings = {
       imdb: ratings.imdb || null,

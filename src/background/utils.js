@@ -7,7 +7,6 @@ module.exports = {
     var millisecondsPerDay = 1000 * 60 * 60 * 24;
     var millisBetween = two - one;
     var days = millisBetween / millisecondsPerDay;
-
     return Math.floor(days);
   },
 

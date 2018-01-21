@@ -16,9 +16,9 @@ function handleMessages(request, sender, sendResponse) {
 
 function fetchRatings(request, sender, sendResponse) {
   request.payload.map(item =>  {
-    console.log("Fetching Rating for", item);
+    console.debug(`Fetching rating for ${item.title} of type ${item.type} is`);
     ratingClient.get(item.type, item.title).then((rating) => {
-      console.log('Fetched Rating for ', item, rating);
+      console.debug(`Fetched Rating for ${item.title} is ${rating.ratings.imdb}`);
       chrome.tabs.sendMessage(sender.tab.id, {
         type: 'ratings',
         payload: rating

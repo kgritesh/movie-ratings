@@ -22,7 +22,6 @@ module.exports = {
   },
 
   get(key) {
-    console.log('Finding key: ' + key);
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(key, (items) => {
         let err = chrome.runtime.lastError;
