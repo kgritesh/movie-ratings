@@ -1,5 +1,22 @@
 const ratingClient = require('./ratingClient');
 
+function initApp() {
+  chrome.webRequest.onCompleted.addListener(
+    onMovieLoaded, {
+      urls: ['http://hotstar-sin.gravityrd-services.com/*'],
+      types: ["script", "xmlhttprequest", "other"]
+    }
+  );
+
+  chrome.runtime.onMessage.addListener(
+    (request, sender, sendResponse) => {
+      fetchRatings(request, sender, sendResponse);
+    }
+  );
+}
+
+initApp();
+
 function onMovieLoaded(details) {
   chrome.tabs.sendMessage(details.tabId, {
     type: "loadMovies"
@@ -26,17 +43,3 @@ function fetchRatings(request, sender, sendResponse) {
     })
   });
 }
-
-chrome.webRequest.onCompleted.addListener(
-  onMovieLoaded, {
-    urls: ['http://hotstar-sin.gravityrd-services.com/*'],
-    types: ["script", "xmlhttprequest", "other"]
-  }
-);
-
-chrome.runtime.onMessage.addListener(
-  (request, sender, sendResponse) => {
-    fetchRatings(request, sender, sendResponse);
-  }
-);
-

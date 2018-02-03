@@ -17,7 +17,7 @@ function init() {
 
   setInterval(() => {
     findTitles();
-  }, 30000);
+  }, 20000);
 };
 
 function findType() {

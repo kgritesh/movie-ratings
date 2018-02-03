@@ -18,6 +18,7 @@ class RatingItem {
 
   toObj() {
     return {
+      key: this.key,
       title: this.title,
       type: this.type,
       ratings: this.ratings,

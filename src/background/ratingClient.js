@@ -1,5 +1,5 @@
 const RatingItem = require('../ratingItem');
-const ratingStore = require('./ratingStore');
+const ratingCache = require('./ratingCache');
 const config = require('../config');
 const OmdbClient = require('./omdb');
 
@@ -10,12 +10,9 @@ module.exports = {
   async get(type, title) {
     const key = `${title}:${type}`;
     try {
-      const ratingItem = await ratingStore.get(key);
+      const ratingItem = await ratingCache.get(key);
       if(ratingItem) {
-        console.log('found in store', key)
         return ratingItem;
-      } else {
-        console.log('Not found in store', key);
       }
     } catch(error) {
       console.error("Unable to fetch rating from the store", error);
@@ -30,7 +27,7 @@ module.exports = {
           return this._getById(results[0].imdbID)
             .then(res => {
               if (res) {
-                ratingStore.save(res);
+                ratingCache.save(res);
                 return res;
               }
               return this._saveEmptyRating(type, title);
@@ -42,7 +39,7 @@ module.exports = {
 
   _saveEmptyRating(type, title) {
     const item = new RatingItem(type, title);
-    ratingStore.save(item);
+    ratingCache.save(item);
     return item;
   },
 
