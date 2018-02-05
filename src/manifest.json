@@ -13,7 +13,7 @@
     "128": "img/icon-128.png"
   },
   "content_scripts": [ {
-    "matches": ["*://*.hotstar.com/tv", "*://*.hotstar.com/movies"],
+    "matches": ["*://*.hotstar.com/tv*", "*://*.hotstar.com/movies*"],
     "js": ["content.bundle.js"]
   }],
 

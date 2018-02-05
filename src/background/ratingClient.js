@@ -1,3 +1,5 @@
+const logger = require('js-logger');
+
 const RatingItem = require('../ratingItem');
 const ratingCache = require('./ratingCache');
 const config = require('../config');
@@ -56,7 +58,7 @@ module.exports = {
   },
 
   _getById(id) {
-    console.log('Fetching Result by id', id);
+    logger.debug('Fetching Result by id', id);
     return this.omdbClient.getById(id)
       .then(omdbRating => {
         if (omdbRating) {

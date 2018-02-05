@@ -75,12 +75,10 @@ class OmdbClient {
     }
 
     const url = `${this.baseUrl}?${utils.queryParams(params)}`;
-    console.log('Search', url);
     return fetch(url)
       .then(this._parseHttpResponse)
       .then((data) => {
         const results = data ? data['Search'] : [];
-        console.log('Seach Results', results);
         if (exactMatch) {
           return results.filter((res) => res.Title.toLowerCase() === title.toLowerCase());
         }

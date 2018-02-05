@@ -3,8 +3,48 @@ const fs = require('fs');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const ZipPlugin = require('zip-webpack-plugin');
 
 const node_dir = path.join(__dirname, 'node_modules');
+
+const env = process.env.NODE_ENV || 'development';
+
+const plugins = [
+  new CleanWebpackPlugin(["dist"]),
+  new webpack.DefinePlugin({
+    "process.env.NODE_ENV": JSON.stringify(env)
+  }),
+  new webpack.ProvidePlugin({
+    $: 'jquery',
+    jQuery: 'jquery'
+  }),
+  new CopyWebpackPlugin([{
+    from: "src/manifest.json",
+    transform: function (content, path) {
+      const newContent = JSON.stringify({
+        description: process.env.npm_package_description,
+        version: process.env.npm_package_version,
+        name: process.env.npm_package_name,
+
+        ...JSON.parse(content.toString())
+      });
+      return newContent;
+    }
+  }, {
+    from: "src/img",
+    to: "img"
+  }])
+];
+
+if (env === 'production') {
+  plugins.push(
+    UglifyJsPlugin({
+      sourceMap: false,
+      compress: true
+    }
+  ));
+}
 
 module.exports = {
   entry: {
@@ -21,31 +61,5 @@ module.exports = {
     }
   },
 
-  plugins: [
-    // clean the build folder
-    new CleanWebpackPlugin(["dist"]),
-    new webpack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || 'development')
-    }),
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery'
-    }),
-    new CopyWebpackPlugin([{
-      from: "src/manifest.json",
-      transform: function (content, path) {
-        const newContent = JSON.stringify({
-          description: process.env.npm_package_description,
-          version: process.env.npm_package_version,
-          name: process.env.npm_package_name,
-
-          ...JSON.parse(content.toString())
-        });
-        return newContent;
-      }
-    }, {
-      from: "src/img",
-      to: "img"
-    }]),
-  ]
+  plugins: plugins
 }

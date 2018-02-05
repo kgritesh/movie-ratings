@@ -1,3 +1,5 @@
+const logger = require('js-logger');
+const config = require('../config');
 const ratingClient = require('./ratingClient');
 
 function initApp() {
@@ -13,11 +15,15 @@ function initApp() {
       fetchRatings(request, sender, sendResponse);
     }
   );
+  logger.useDefaults({
+    defaultLevel: config.logLevel
+  });
 }
 
 initApp();
 
 function onMovieLoaded(details) {
+  chrome.pageAction.show(details.tabId);
   chrome.tabs.sendMessage(details.tabId, {
     type: "loadMovies"
   });
@@ -33,7 +39,7 @@ function handleMessages(request, sender, sendResponse) {
 
 function fetchRatings(request, sender, sendResponse) {
   request.payload.map(item =>  {
-    console.debug(`Fetching rating for ${item.title} of type ${item.type} is`);
+    console.debug(`Fetching rating for ${item.title} of type ${item.type}`);
     ratingClient.get(item.type, item.title).then((rating) => {
       console.debug(`Fetched Rating for ${item.title} is ${rating.ratings.imdb}`);
       chrome.tabs.sendMessage(sender.tab.id, {

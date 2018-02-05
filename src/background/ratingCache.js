@@ -1,3 +1,5 @@
+const logger = require('js-logger');
+
 const utils = require('./utils');
 const config = require('../config');
 const ratingStore = require('./ratingStore');
@@ -36,7 +38,7 @@ module.exports = {
         } else if (items && items[key]) {
             const createdAt = new Date(items[key].createdAt);
             if (utils.daysBetween(createdAt, new Date()) >= config.cacheExpiry) {
-              console.log('Key expired', key, createdAt);
+              logger.debug('Key expired', key, createdAt);
               this.remove(key);
               resolve(null);
             } else {

@@ -1,3 +1,5 @@
+const logger = require('js-logger');
+
 const firebase = require("firebase");
 require("firebase/firestore");
 const config = require('../config');
@@ -16,7 +18,7 @@ module.exports = {
 
         firebase.auth().onAuthStateChanged((user) => {
           this._initialized = true;
-          console.log('Firebase Connection Initialized', user);
+          logger.debug('Firebase Connection Initialized', user);
           if (user) {
             this.isAuthenticated = true;
             this._callbacks.forEach(cb => cb.resolve());
@@ -27,7 +29,7 @@ module.exports = {
         });
 
         firebase.auth().signInAnonymously().catch(function(error) {
-          console.log('Failed to authenticate user', error);
+          logger.debug('Failed to authenticate user', error);
           reject(error);
         });
       }
