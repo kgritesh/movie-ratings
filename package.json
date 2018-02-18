@@ -1,5 +1,5 @@
 {
-  "name": "movie-ratings",
+  "name": "omdb-ratings",
   "version": "0.0.1",
   "description": "A browser extension to show imdb/rotten tomatoes movie ratings on streaming sites",
   "main": "index.js",
@@ -14,7 +14,7 @@
     "imdb-api": "^3.1.2",
     "jquery": "^3.2.1",
     "js-logger": "^1.4.1",
-    "zip-webpack-plugin": "^2.1.0"
+    "webpack-archive-plugin": "^3.0.0"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.17",

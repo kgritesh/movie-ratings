@@ -1,10 +1,11 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
+const pjson = require('./package.json');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const ZipPlugin = require('zip-webpack-plugin');
+const ArchivePlugin = require('webpack-archive-plugin');
 
 const node_dir = path.join(__dirname, 'node_modules');
 
@@ -39,11 +40,14 @@ const plugins = [
 
 if (env === 'production') {
   plugins.push(
-    UglifyJsPlugin({
-      sourceMap: false,
-      compress: true
-    }
-  ));
+    new UglifyJsPlugin({
+      sourceMap: false
+    }),
+    new ArchivePlugin({
+      output: path.join(__dirname, 'pkg', `omdb-ratings-${pjson.version}`),
+      format: ['zip']
+    })
+  );
 }
 
 module.exports = {
